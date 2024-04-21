@@ -214,3 +214,41 @@ JOIN country_max_spending ms
 ON cc.billing_country = ms.billing_country
 WHERE cc.total_spending = ms.max_spending
 ORDER BY 1;
+
+/* Q4. Write a query to calculate the average total spending of customers who are enrolled in the loyalty program versus those who are not
+Include the number of customers in each group in your results. */
+SELECT
+    CASE
+        WHEN loyalty_program = 1 THEN 'Enrolled'
+        ELSE 'Not Enrolled'
+    END AS loyalty_status,
+    COUNT(customer_id) AS customer_count,
+    AVG(total) AS average_total_spending
+FROM
+    invoice
+GROUP BY
+    loyalty_status;
+
+/*Q5.Write a query to calculate the total sales amount for each year and the percentage change in sales from the previous year to the current year. */
+
+SELECT
+    EXTRACT(YEAR FROM invoice_date) AS sales_year,
+    SUM(total) AS total_sales_amount,
+    (SUM(total) - LAG(SUM(total)) OVER (ORDER BY EXTRACT(YEAR FROM invoice_date))) / LAG(SUM(total)) OVER (ORDER BY EXTRACT(YEAR FROM invoice_date)) * 100 AS sales_growth_percentage
+FROM
+    invoice
+GROUP BY
+    sales_year;
+
+/* Q6. Rank the employees based on their sales performance and provide insights into their contributions.*/
+
+SELECT
+    employee_id,
+    SUM(total) AS total_sales_amount
+FROM
+    invoice
+GROUP BY
+    employee_id
+ORDER BY
+    total_sales_amount DESC;
+
